@@ -10,7 +10,9 @@ I wrote the email template body in HTML and parse it with BeautifulSoup
 My personalized email says:
 
 TO: maik.ryvan@email.com
+
 CC: myboss@ABCgroup.com, KeyAcountManager@ABCgroup.com
+
 SUBJECT: BBB COMPANY - ABC GROUP - REQUEST FOR PRICES
 
 Dear Mr. RECIPIENT NAME,
