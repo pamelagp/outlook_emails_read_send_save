@@ -1,0 +1,102 @@
+## I wrote this code because I needed to send  +50 peronalized emails to +50 different companies using my company's Outlook email
+## I have an excel file with the relevant information such as COMPANY NAME, RECIPIENTS NAME, and some other information I needed to send.
+## I wrote the email template body in HTML and parse it with BeautifulSoup
+
+
+### EMAIL TEMPLATE written in HTML saved in a separate file called 'email_template.html'  #####
+
+
+<html>
+    <p>Dear RECIPIENT_NAME,</p>
+    <p>
+        Dear Mr. RECIPIENT NAME, I am Elizabeth Aline, Marketing Specialist at ABC Group. 
+        Today I'm getting in touch regarding our client BBB Company. I need to request some prices.
+        <br>Attached to this email, you will find:
+    </p>
+    <ul>
+        <li>Attachement 1</li>
+        <li>COMPANY_NAME attachment 2 </li>
+        <li>COMPANY_NAME attachment 3 </li>
+    </ul>
+    <p>
+        If you have any questions, I will be happy to assist you. <br>
+        Kind regards,
+    </p>
+        <b>Elizabeth Lastname</b><br>
+          Marketing Specialist<br>
+    <a href="mailto: Elizabeth.Mkt@ABCgroup.com">Elizabeth.Mkt@ABCgroup.com</a><br>
+    T: +999 (0) 45382 93948
+    <br>
+    <br>
+    <a href="https://www.ABCgroup.com/">ABCgroup.com</a><br>
+    Address Addrss<br>
+    My town, My postcode<br>
+
+</html>
+
+
+
+#########   Code to send the above email template, from my Outlook email, reading the emial, subject, company name and recipients name ########
+
+import win32com.client
+from bs4 import BeautifulSoup
+import xlrd
+
+# Open email template  and read its contents
+with open('email_template.html') as fp:
+    email_template = BeautifulSoup(fp, 'html.parser')
+
+# Open contact list file and read its contents
+workbook = xlrd.open_workbook('contact_list.xlsx')
+worksheet = workbook.sheet_by_index(0)
+
+curr_row = 0
+num_rows = worksheet.nrows - 1
+dicccionario = {}
+
+while curr_row < num_rows:
+    curr_row += 1
+    email_body = str(email_template)
+    
+    # Get the email and the personalized subject for each email from the contact_list.xlsx 
+    EMAIL = (worksheet.cell(curr_row, 5).value)
+    SUBJECT = (worksheet.cell(curr_row, 9).value)
+
+    # Use a diccionary to replace all the words in the email template, with the unique values on your contact_list.xlsx file.
+    
+    diccionario = {
+        'CLIENT_NAME' : (worksheet.cell(curr_row, 0).value),
+        'RECIPIENT_SUPPLIER' : (worksheet.cell(curr_row, 1).value),
+        }
+    for key in diccionario:
+        print(key + ' = ' + (diccionario[key]))
+        email_body = email_body.replace(str(key), str(diccionario[key]))
+        print(email_body)
+
+
+
+    # Open outlook application, create an email and insert recipients, subject, body and attachments
+    outlook = win32com.client.Dispatch("Outlook.Application")
+
+    Msg = outlook.CreateItem(0)
+
+    Msg.To = EMAIL
+    Msg.CC = 'email@email.com;' + ' ' + 'email@email.com'
+    Msg.Subject = SUBJECT
+    
+    Msg.HTMLBody = str(email_body)
+
+    attachment1 = 'C:\\Users\\youruser\\PycharmProjects\\send_emails\\attachementfile1.pdf'
+    attachment2 = 'C:\\Users\\youruser\\PycharmProjects\\send_emails\\attachementfile2.xlsx'
+    attachment3 = 'C:\\Users\\youruser\\PycharmProjects\\send_emails\\attachementfile3.ppt'
+
+    Msg.Attachments.Add(attachment1)
+    Msg.Attachments.Add(attachment2)
+    Msg.Attachments.Add(attachment3)
+
+
+    # See how the email looks like before sending
+    Msg.Display(True)
+    
+    # To send, uncomment the line below
+    # Msg.Send()
